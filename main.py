@@ -1,32 +1,41 @@
+import os
 import sys
-import dirTree
+import time
+import filecmp
 
-def gather_arguments(arguments):
-    if(len(arguments) > 2):
-        if(len(arguments) > 3):
-            depth = int(arguments[3])
+from compare import compare_directories
+
+def input_is_directory(input):
+    return os.path.isdir(input)
+
+def get_directories_from_arguments(arguments):
+    try:
+        if(input_is_directory(arguments[1])):
+            dir1 = arguments[1]
         else:
-            depth = 2
+            raise ValueError("Input 1 is not a valid Directory")
+        if(input_is_directory(arguments[2])):
+            dir2 = arguments[2]
+        else:
+            raise ValueError("Input 2 is not a valid Directory")
+    except IndexError:
+        raise IndexError("Not enough Directorienames given")
 
-        startfolderFullPath1 = arguments[1]
-        startfolderFullPath2 = arguments[2]
-        result = (startfolderFullPath1, startfolderFullPath2, depth)
-    else:
-        result = None
-
-    return result
+    return dir1, dir2
 
 if __name__ == "__main__":
-    arguments = gather_arguments(sys.argv)
+    print("Start")
+    start_ts = time.time()
 
-    if(arguments is None):
-        print("To less / wrong arguments")
+    try:
+        dir1, dir2 = get_directories_from_arguments(sys.argv)
+        dcmp = filecmp.dircmp(dir1, dir2)
+        depth = 1
+        compare_directories(dcmp, depth)
+    except Exception as e:
+        print(e)
 
-    else:
-        startfolderFullPath1, startfolderFullPath2, depth = arguments
+    end_ts = time.time()
+    duration = round(end_ts - start_ts)
 
-        dirTree1 = dirTree.Create_dir_tree(startfolderFullPath1, depth)
-        dirTree2 = dirTree.Create_dir_tree(startfolderFullPath2, depth)
-        print(dirTree1)
-        print(dirTree2)
-        dirTree.Compare_dir_tree(dirTree1, dirTree2)        
+    print("End after %s seconds" %(duration))
